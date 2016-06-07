@@ -8,21 +8,27 @@
            http://www.springframework.org/schema/beans/spring-beans.xsd"
        default-init-method="initialize">
 
-    <import resource="../common-beans.xml" />
-
     <!-- Action beans -->
-    <bean id="initializeProfileRequestContext"
+    <bean id="InitializeProfileRequestContext"
           class="net.shibboleth.idp.profile.impl.InitializeProfileRequestContext"
-          p:profileId="#{T(net.shibboleth.idp.cas.config.ProxyConfiguration).PROFILE_ID}"
+          p:profileId="#{T(net.shibboleth.idp.cas.config.impl.ProxyConfiguration).PROFILE_ID}"
           p:loggingId="%{idp.service.logging.cas:SSO}"
           p:browserProfile="false" />
 
-    <bean id="initializeProxyAction"
-          class="net.shibboleth.idp.cas.flow.InitializeProxyAction"
-          c:ticketService-ref="cas.ticketService" />
+    <bean id="InitializeProxy"
+          class="net.shibboleth.idp.cas.flow.impl.InitializeProxyAction"
+          c:ticketService-ref="cas.TicketService" />
 
-    <bean id="grantProxyTicketAction"
-          class="net.shibboleth.idp.cas.flow.GrantProxyTicketAction"
-          c:ticketService-ref="cas.ticketService" />
+    <bean id="GrantProxyTicket"
+          class="net.shibboleth.idp.cas.flow.impl.GrantProxyTicketAction"
+          c:ticketService-ref="cas.TicketService" />
+
+    <bean id="PopulateAuditContext"
+          class="net.shibboleth.idp.profile.audit.impl.PopulateAuditContext" scope="prototype"
+          p:fieldExtractors-ref="#{
+            getObject('shibboleth.CASProxyAuditExtractors') != null
+                ? 'shibboleth.CASProxyAuditExtractors'
+                : 'shibboleth.DefaultCASProxyAuditExtractors'}"
+          p:formattingMap-ref="shibboleth.AuditFormattingMap" />
 
 </beans>

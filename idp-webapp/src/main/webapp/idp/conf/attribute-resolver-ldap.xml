@@ -88,6 +88,7 @@
                 %{idp.attribute.resolver.LDAP.searchFilter}
             ]]>
         </dc:FilterTemplate>
+        <dc:ReturnAttributes>%{idp.attribute.resolver.LDAP.returnAttributes}</dc:ReturnAttributes>
         <dc:StartTLSTrustCredential id="LDAPtoIdPCredential" xsi:type="sec:X509ResourceBacked">
             <sec:Certificate>%{idp.attribute.resolver.LDAP.trustCertificates}</sec:Certificate>
         </dc:StartTLSTrustCredential>

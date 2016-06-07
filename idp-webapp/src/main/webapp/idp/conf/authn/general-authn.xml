@@ -23,7 +23,7 @@
     Flow defaults include: no support for IsPassive/ForceAuthn, support for non-browser clients enabled,
     and default timeout and lifetime values set via properties. We also default to supporting the SAML 1/2
     expressions for password-based authentication over a secure channel, so anything more exotic requires
-    customization, as the example below for IP address authentication illustrates.
+    customization, as the examples below for IP address and SPNEGO authentication illustrate.
     -->
 
     <util:list id="shibboleth.AvailableAuthenticationFlows">
@@ -32,13 +32,25 @@
                 p:passiveAuthenticationSupported="true"
                 p:lifetime="PT60S" p:inactivityTimeout="PT60S">
             <property name="supportedPrincipals">
-                <util:list>
+                <list>
                     <bean parent="shibboleth.SAML2AuthnContextClassRef"
                         c:classRef="urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocol" />
-                </util:list>
+                </list>
             </property>
         </bean>
 
+        <bean id="authn/SPNEGO" parent="shibboleth.AuthenticationFlow"
+                p:nonBrowserSupported="false">
+            <property name="supportedPrincipals">
+                <list>
+                    <bean parent="shibboleth.SAML2AuthnContextClassRef"
+                        c:classRef="urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos" />
+                    <bean parent="shibboleth.SAML1AuthenticationMethod"
+                        c:method="urn:ietf:rfc:1510" />
+                </list>
+            </property>
+        </bean>
+        
         <bean id="authn/External" parent="shibboleth.AuthenticationFlow"
             p:nonBrowserSupported="false" />
 
@@ -50,27 +62,27 @@
         <bean id="authn/X509" parent="shibboleth.AuthenticationFlow"
                 p:nonBrowserSupported="false">
             <property name="supportedPrincipals">
-                <util:list>
+                <list>
                     <bean parent="shibboleth.SAML2AuthnContextClassRef"
                         c:classRef="urn:oasis:names:tc:SAML:2.0:ac:classes:X509" />
                     <bean parent="shibboleth.SAML2AuthnContextClassRef"
                         c:classRef="urn:oasis:names:tc:SAML:2.0:ac:classes:TLSClient" />
                     <bean parent="shibboleth.SAML1AuthenticationMethod"
                         c:method="urn:ietf:rfc:2246" />
-                </util:list>
+                </list>
             </property>
         </bean>
 
         <bean id="authn/X509Internal" parent="shibboleth.AuthenticationFlow">
             <property name="supportedPrincipals">
-                <util:list>
+                <list>
                     <bean parent="shibboleth.SAML2AuthnContextClassRef"
                         c:classRef="urn:oasis:names:tc:SAML:2.0:ac:classes:X509" />
                     <bean parent="shibboleth.SAML2AuthnContextClassRef"
                         c:classRef="urn:oasis:names:tc:SAML:2.0:ac:classes:TLSClient" />
                     <bean parent="shibboleth.SAML1AuthenticationMethod"
                         c:method="urn:ietf:rfc:2246" />
-                </util:list>
+                </list>
             </property>
         </bean>
 

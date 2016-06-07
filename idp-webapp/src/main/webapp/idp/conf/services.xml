@@ -75,12 +75,12 @@
         <bean id="fileResource" class="net.shibboleth.ext.spring.resource.FileBackedHTTPResource"
               c:client-ref="shibboleth.FileCachingHttpClient" 
               c:url="http://example.org/path/to/file.xml"
-              c:resource="/var/shibboleth/caches/resourcecache/file.xml"/>
+              c:backingFile="/var/shibboleth/caches/resourcecache/file.xml"/>
        
         <bean id="otherFileResource" class="net.shibboleth.ext.spring.resource.FileBackedHTTPResource"
               c:client-ref="shibboleth.FileCachingHttpClient" 
               c:url="http://another.server.example.org/path/to/different/file.xml"
-              c:resource="/var/shibboleth/caches/resourcecache/differentFile.xml"/>
+              c:backingFile="/var/shibboleth/caches/resourcecache/differentFile.xml"/>
               
         In all cases you should review the "idp.httpclient.*" properties defined in services.properties
     -->
@@ -125,6 +125,10 @@
     <util:list id="shibboleth.AccessControlResources">
         <value>%{idp.home}/conf/access-control.xml</value>
         <value>%{idp.home}/system/conf/access-control-system.xml</value>
+    </util:list>
+
+    <util:list id="shibboleth.CASServiceRegistryResources">
+        <value>%{idp.home}/conf/cas-protocol.xml</value>
     </util:list>
 
     <!--

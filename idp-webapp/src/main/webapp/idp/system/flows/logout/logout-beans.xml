@@ -27,12 +27,22 @@
         p:loggingId="%{idp.service.logging.logout:Logout}"
         p:browserProfile="true" />
 
+    <bean id="PopulateClientStorageLoadContext"
+        class="org.opensaml.storage.impl.client.PopulateClientStorageLoadContext" scope="prototype"
+        p:storageServices-ref="#{ getObject('shibboleth.ClientStorageServices') != null
+            ? 'shibboleth.ClientStorageServices' : 'shibboleth.DefaultClientStorageServices' }" />
+
     <bean id="ProcessLogout"
         class="net.shibboleth.idp.session.impl.ProcessLogout" scope="prototype"
         p:httpServletRequest-ref="shibboleth.HttpServletRequest"
         p:httpServletResponse-ref="shibboleth.HttpServletResponse"
         p:sessionManager-ref="shibboleth.SessionManager"
         p:sessionResolver-ref="shibboleth.SessionManager" />
+    
+    <bean id="PopulateClientStorageSaveContext"
+        class="org.opensaml.storage.impl.client.PopulateClientStorageSaveContext" scope="prototype"
+        p:storageServices-ref="#{ getObject('shibboleth.ClientStorageServices') != null
+            ? 'shibboleth.ClientStorageServices' : 'shibboleth.DefaultClientStorageServices' }" />
     
     <bean id="LogoutPopulateAuditContext"
         class="net.shibboleth.idp.profile.audit.impl.PopulateAuditContext" scope="prototype"
@@ -50,7 +60,7 @@
             p:activationCondition="%{idp.logout.elaboration:false}"
             p:httpServletRequest-ref="shibboleth.HttpServletRequest">
         <property name="fallbackLanguages">
-            <bean parent="shibboleth.CommaDelimStringArray" c:_0="%{idp.ui.fallbackLanguages:}" />
+            <bean parent="shibboleth.CommaDelimStringArray" c:_0="#{'%{idp.ui.fallbackLanguages:}'.trim()}" />
         </property>
         <property name="metadataContextLookupStrategy">
             <bean class="com.google.common.base.Functions" factory-method="compose">
@@ -87,6 +97,12 @@
             </bean>
         </property>
     </bean>
+
+    <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent" scope="prototype">
+        <property name="eventContextLookupStrategy">
+            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+        </property>
+    </bean>
     
     <bean id="WriteAuditLog" class="net.shibboleth.idp.profile.audit.impl.WriteAuditLog" scope="prototype"
         p:formattingMap-ref="shibboleth.AuditFormattingMap" />
@@ -100,5 +116,8 @@
         class="net.shibboleth.idp.profile.context.navigate.SpringEventToViewLookupFunction"
         p:defaultView-ref="shibboleth.DefaultErrorView"
         p:eventMap="#{getObject('shibboleth.EventViewMap')}" />
+
+    <bean id="SaveLogoutContext"
+          class="net.shibboleth.idp.session.impl.SaveLogoutContext" />
 
 </beans>

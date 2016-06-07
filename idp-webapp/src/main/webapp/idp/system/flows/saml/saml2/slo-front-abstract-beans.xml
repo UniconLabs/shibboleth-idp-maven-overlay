@@ -41,7 +41,7 @@
     
     <bean id="LogoutPopulateAuditContext"
         class="net.shibboleth.idp.profile.audit.impl.PopulateAuditContext" scope="prototype"
-        p:fieldExtractors-ref="shibboleth.LogoutAuditExtractors"
+        p:fieldExtractors="#{getObject('shibboleth.LogoutRequestAuditExtractors') ?: getObject('shibboleth.DefaultLogoutRequestAuditExtractors')}"
         p:formattingMap-ref="shibboleth.AuditFormattingMap" />
         
     <bean id="PopulateMultiRPContextFromLogoutContext"
@@ -106,14 +106,24 @@
     <bean id="shibboleth.PreEncodeMessageHandler"
             class="org.opensaml.messaging.handler.impl.BasicMessageHandlerChain" scope="prototype">
         <property name="handlers">
-            <util:list>
-                <!-- TODO outbound handlers -->
+            <list>
                 <bean class="org.opensaml.saml.common.binding.impl.SAMLOutboundDestinationHandler" scope="prototype"/>
                 <bean class="org.opensaml.saml.common.binding.security.impl.EndpointURLSchemeSecurityHandler" scope="prototype"/>
-                <bean class="org.opensaml.saml.common.binding.security.impl.SAMLOutboundProtocolMessageSigningHandler"
-                    scope="prototype" p:signErrorResponses="%{idp.errors.signed:true}" />
-            </util:list>
+                <bean class="org.opensaml.saml.common.binding.security.impl.SAMLOutboundProtocolMessageSigningHandler" scope="prototype"
+                        p:signErrorResponses="%{idp.errors.signed:true}">
+                    <property name="activationCondition">
+                        <bean parent="shibboleth.Conditions.NOT">
+                            <constructor-arg>
+                                <bean class="org.opensaml.saml.common.messaging.logic.SignatureCapableBindingPredicate" />
+                            </constructor-arg>
+                        </bean>
+                    </property>
+                </bean>
+            </list>
         </property>
     </bean>
+
+    <bean id="SaveLogoutContext"
+          class="net.shibboleth.idp.session.impl.SaveLogoutContext" />
 
 </beans>

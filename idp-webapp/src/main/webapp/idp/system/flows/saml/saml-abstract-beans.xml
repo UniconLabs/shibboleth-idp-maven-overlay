@@ -122,6 +122,61 @@
         p:endpointType="#{getObject('shibboleth.EndpointType')}"
         p:bindings-ref="shibboleth.OutgoingBindings"
         p:artifactImpliesSecureChannel="%{idp.artifact.secureChannel:true}" />
+        
+    <bean id="PopulateDelegationContext"
+            class="net.shibboleth.idp.saml.saml2.profile.delegation.impl.PopulateDelegationContext" scope="prototype">
+        <property name="credentialResolver" ref="shibboleth.MetadataCredentialResolver" />
+    </bean>
+
+    <bean id="PopulateResponseSignatureSigningParameters"
+            class="org.opensaml.saml.common.profile.impl.PopulateSignatureSigningParameters" scope="prototype"
+            p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
+            p:signatureSigningParametersResolver-ref="shibboleth.SignatureSigningParametersResolver">
+        <property name="activationCondition">
+            <bean class="net.shibboleth.idp.saml.profile.config.logic.SignResponsesPredicate" />
+        </property>
+    </bean>
+
+    <bean id="PopulateRequestSignatureSigningParameters"
+            class="org.opensaml.saml.common.profile.impl.PopulateSignatureSigningParameters" scope="prototype"
+            p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
+            p:signatureSigningParametersResolver-ref="shibboleth.SignatureSigningParametersResolver">
+        <property name="activationCondition">
+            <bean class="net.shibboleth.idp.saml.profile.config.logic.SignRequestsPredicate" />
+        </property>
+    </bean>
+
+    <bean id="PopulateAssertionSignatureSigningParameters"
+            class="org.opensaml.saml.common.profile.impl.PopulateSignatureSigningParameters" scope="prototype"
+            p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
+            p:signatureSigningParametersResolver-ref="shibboleth.SignatureSigningParametersResolver">
+        <property name="activationCondition">
+            <bean parent="shibboleth.Conditions.OR">
+                <constructor-arg>
+                    <bean class="net.shibboleth.idp.saml.profile.config.logic.SignAssertionsPredicate"
+                        p:honorMetadata="%{idp.signing.honorWantAssertionsSigned:true}" />
+                </constructor-arg>
+                <constructor-arg ref="shibboleth.Conditions.IssuingDelegatedAssertion" />
+            </bean>
+        </property>
+        <property name="securityParametersContextLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookupOrCreate.SecurityParameters"
+                c:f-ref="shibboleth.ChildLookup.RelyingParty" />
+        </property>
+        <property name="existingParametersContextLookupStrategy">
+            <bean class="com.google.common.base.Functions" factory-method="compose"
+                c:g-ref="shibboleth.ChildLookup.SecurityParameters"
+                c:f-ref="shibboleth.MessageContextLookup.Outbound" />
+        </property>
+    </bean>
+    
+    <bean id="PopulateEncryptionParameters"
+            class="net.shibboleth.idp.saml.saml2.profile.impl.PopulateEncryptionParameters" scope="prototype"
+            p:configurationLookupStrategy-ref="shibboleth.EncryptionConfigurationLookup"
+            p:encryptionParametersResolver-ref="shibboleth.EncryptionParametersResolver"
+            p:protocol-ref="shibboleth.MetadataLookup.Protocol"
+            p:role-ref="shibboleth.MetadataLookup.Role" />
 
     <bean id="PopulateDecryptionParameters"
         class="org.opensaml.profile.action.impl.PopulateDecryptionParameters" scope="prototype"
@@ -154,47 +209,16 @@
     <bean id="FinalizeSAMLSubjectCanonicalization"
         class="net.shibboleth.idp.saml.profile.impl.FinalizeSAMLSubjectCanonicalization" scope="prototype" />
 
-    <bean id="PopulateResponseSignatureSigningParameters"
-            class="org.opensaml.saml.common.profile.impl.PopulateSignatureSigningParameters" scope="prototype"
-            p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
-            p:signatureSigningParametersResolver-ref="shibboleth.SignatureSigningParametersResolver">
-        <property name="activationCondition">
-            <bean class="net.shibboleth.idp.saml.profile.config.logic.SignResponsesPredicate" />
-        </property>
-    </bean>
-
-    <bean id="PopulateAssertionSignatureSigningParameters"
-            class="org.opensaml.saml.common.profile.impl.PopulateSignatureSigningParameters" scope="prototype"
-            p:configurationLookupStrategy-ref="shibboleth.SignatureSigningConfigurationLookup"
-            p:signatureSigningParametersResolver-ref="shibboleth.SignatureSigningParametersResolver">
-        <property name="activationCondition">
-            <bean class="net.shibboleth.idp.saml.profile.config.logic.SignAssertionsPredicate"
-                p:honorMetadata="%{idp.signing.honorWantAssertionsSigned:true}" />
-        </property>
-        <property name="securityParametersContextLookupStrategy">
-            <bean class="com.google.common.base.Functions" factory-method="compose"
-                c:g-ref="shibboleth.ChildLookupOrCreate.SecurityParameters"
-                c:f-ref="shibboleth.ChildLookup.RelyingParty" />
-        </property>
-        <property name="existingParametersContextLookupStrategy">
-            <bean class="com.google.common.base.Functions" factory-method="compose"
-                c:g-ref="shibboleth.ChildLookup.SecurityParameters"
-                c:f-ref="shibboleth.MessageContextLookup.Outbound" />
-        </property>
-    </bean>
-    
-    <bean id="PopulateEncryptionParameters"
-            class="net.shibboleth.idp.saml.saml2.profile.impl.PopulateEncryptionParameters" scope="prototype"
-            p:configurationLookupStrategy-ref="shibboleth.EncryptionConfigurationLookup"
-            p:encryptionParametersResolver-ref="shibboleth.EncryptionParametersResolver"
-            p:protocol-ref="shibboleth.MetadataLookup.Protocol"
-            p:role-ref="shibboleth.MetadataLookup.Role" />
+    <bean id="PopulateClientStorageLoadContext"
+        class="org.opensaml.storage.impl.client.PopulateClientStorageLoadContext" scope="prototype"
+        p:storageServices-ref="#{ getObject('shibboleth.ClientStorageServices') != null
+            ? 'shibboleth.ClientStorageServices' : 'shibboleth.DefaultClientStorageServices' }" />
 
     <bean id="InitializeAuthenticationContext"
         class="net.shibboleth.idp.saml.profile.impl.InitializeAuthenticationContext" scope="prototype" />
 
     <bean id="InitialAuthenticationFlag" class="java.lang.Boolean">
-        <constructor-arg value="#{ '%{idp.authn.flows.initial:}'.length() gt 0 }" type="boolean" />
+        <constructor-arg value="#{ '%{idp.authn.flows.initial:}'.trim().length() gt 0 }" type="boolean" />
     </bean>
 
     <bean id="InitializeRequestedPrincipalContext"
@@ -272,6 +296,11 @@
         p:fieldExtractors-ref="shibboleth.PostResponseAuditExtractors"
         p:formattingMap-ref="shibboleth.AuditFormattingMap" />
 
+    <bean id="PopulateClientStorageSaveContext"
+        class="org.opensaml.storage.impl.client.PopulateClientStorageSaveContext" scope="prototype"
+        p:storageServices-ref="#{ getObject('shibboleth.ClientStorageServices') != null
+            ? 'shibboleth.ClientStorageServices' : 'shibboleth.DefaultClientStorageServices' }" />
+
     <bean id="PopulateOutboundInterceptContext"
             class="net.shibboleth.idp.profile.interceptor.impl.PopulateProfileInterceptorContext" scope="prototype"
             p:availableFlows-ref="shibboleth.AvailableInterceptFlows">
@@ -300,10 +329,21 @@
 
     <bean id="WriteAuditLog" class="net.shibboleth.idp.profile.audit.impl.WriteAuditLog" scope="prototype"
         p:formattingMap-ref="shibboleth.AuditFormattingMap" />
+        
+    <bean id="WriteFTICKSLog" class="net.shibboleth.idp.saml.audit.impl.WriteFTICKSLog" scope="prototype"
+        p:activationCondition="#{'%{idp.fticks.federation:null}' != 'null'}"
+        p:federationId="#{'%{idp.fticks.federation:Undefined}'.trim()}"
+        p:digestAlgorithm="#{'%{idp.fticks.algorithm:SHA-256}'.trim()}" p:salt="%{idp.fticks.salt:}" />
 
     <bean id="LocalErrorPredicate"
             class="org.opensaml.saml.common.profile.logic.DefaultLocalErrorPredicate"
             p:localEvents="#{getObject('shibboleth.LocalEventMap').keySet()}">
+        <property name="eventContextLookupStrategy">
+            <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
+        </property>
+    </bean>
+
+    <bean id="LogEvent" class="org.opensaml.profile.action.impl.LogEvent" scope="prototype">
         <property name="eventContextLookupStrategy">
             <bean class="net.shibboleth.idp.profile.context.navigate.WebFlowCurrentEventLookupFunction" />
         </property>

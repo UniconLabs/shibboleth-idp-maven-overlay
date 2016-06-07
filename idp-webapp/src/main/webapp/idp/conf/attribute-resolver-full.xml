@@ -264,7 +264,7 @@
                                          jdbcPassword="mypassword" />
         <dc:QueryTemplate>
             <![CDATA[
-                SELECT * FROM student WHERE gzbtpid = '$requestContext.principalName'
+                SELECT * FROM student WHERE gzbtpid = '$resolutionContext.principal'
             ]]>
         </dc:QueryTemplate>
 

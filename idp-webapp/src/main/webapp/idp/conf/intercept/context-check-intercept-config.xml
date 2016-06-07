@@ -23,7 +23,8 @@
         <constructor-arg>
             <list>
                 <bean parent="shibboleth.Conditions.RelyingPartyId" c:candidates="#{ 'https://sp.example.org' }" />
-                <bean class="net.shibboleth.idp.profile.logic.SimpleAttributePredicate">
+                <bean class="net.shibboleth.idp.profile.logic.SimpleAttributePredicate"
+                        p:useUnfilteredAttributes="true">
                     <property name="attributeValueMap">
                         <map>
                             <entry key="eppn">

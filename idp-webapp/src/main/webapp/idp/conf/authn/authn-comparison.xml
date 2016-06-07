@@ -49,7 +49,7 @@
     
     <util:map id="shibboleth.AuthnComparisonRules">
     
-        <!-- Exact matching, this can be left as-is. -->
+        <!-- Exact matching, should be left alone to avoid tricking the IdP into behaving incorrectly. -->
         <entry key-ref="shibboleth.SAMLAuthnMethodExact" value-ref="shibboleth.ExactMatchFactory"/>
         <entry key-ref="shibboleth.SAMLACClassRefExact" value-ref="shibboleth.ExactMatchFactory"/>
         <entry key-ref="shibboleth.SAMLACDeclRefExact" value-ref="shibboleth.ExactMatchFactory"/>
@@ -67,5 +67,11 @@
         <entry key-ref="shibboleth.SAMLACDeclRefBetter" value-ref="shibboleth.BetterDeclRefMatchFactory"/>
         
     </util:map>
+    
+    <!-- List of context classes or declarations to ignore if an SP requests them. -->
+
+    <util:list id="shibboleth.IgnoredContexts">
+        <value>urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified</value>
+    </util:list>
     
 </beans>

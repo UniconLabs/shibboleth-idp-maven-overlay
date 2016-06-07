@@ -6,18 +6,15 @@
       parent="cas.abstractValidate">
 
     <!-- Bootstrap action has to be at the "top" of the flow after this flow prepends itself to parent. -->
-    <action-state id="initializeValidate">
-        <evaluate expression="initializeProfileRequestContext"/>
-        <evaluate expression="initializeValidateAction" />
+    <action-state id="InitializeValidate">
+        <evaluate expression="InitializeProfileRequestContext"/>
+        <evaluate expression="InitializeValidate" />
         <evaluate expression="'proceed'" />
-        <transition on="serviceNotSpecified" to="validateFailure" />
-        <transition on="ticketNotSpecified" to="validateFailure" />
-        <transition on="proceed" to="initializeRelyingParty" />
+        <transition on="proceed" to="InitializeRelyingParty" />
     </action-state>
 
-    <action-state id="handleValidProxyTicket">
+    <action-state id="HandleValidProxyTicket">
         <evaluate expression="T(net.shibboleth.idp.cas.protocol.ProtocolError).InvalidTicketType.event(flowRequestContext.currentState)" />
-        <transition to="validateFailure" />
     </action-state>
 
     <bean-import resource="serviceValidate-beans.xml" />

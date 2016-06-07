@@ -18,6 +18,9 @@
     <!-- Unsuccessful terminal states. -->
     
     <decision-state id="HandleErrorWithView">
+        <on-entry>
+            <evaluate expression="LogEvent" />
+        </on-entry>
         <if test="flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.LocalEventMap').containsKey(currentEvent.id) and flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.LocalEventMap').get(currentEvent.id)"
             then="AuditedErrorView" else="ErrorView" />
     </decision-state>
@@ -30,6 +33,7 @@
             <evaluate expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)" result="requestScope.encoder" />
             <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="requestScope.request" />
             <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="requestScope.response" />
+            <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.CustomViewContext') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.CustomViewContext') : null" result="requestScope.custom" />
         </on-entry>
         <exception-handler bean="RethrowingFlowExecutionExceptionHandler"/>
     </end-state>
@@ -41,6 +45,7 @@
             <evaluate expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)" result="requestScope.encoder" />
             <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="requestScope.request" />
             <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="requestScope.response" />
+            <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.CustomViewContext') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.CustomViewContext') : null" result="requestScope.custom" />
         </on-entry>
         <exception-handler bean="RethrowingFlowExecutionExceptionHandler"/>
     </end-state>

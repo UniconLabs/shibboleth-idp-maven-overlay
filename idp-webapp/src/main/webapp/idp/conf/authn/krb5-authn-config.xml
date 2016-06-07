@@ -15,6 +15,16 @@
     <util:constant id="shibboleth.authn.Krb5.RefreshConfig" static-field="java.lang.Boolean.FALSE" />
 
     <util:constant id="shibboleth.authn.Krb5.PreserveTicket" static-field="java.lang.Boolean.FALSE" />
+
+    <!--
+    Uncomment these beans to perform KDC verification using a service principal and keytab.
+    The keytab bean must be an absolute file pathname and not a reference to a classpath resource,
+    so if idp.home is not a path, don't use it in the value.
+    -->
+    <!--
+    <bean id="shibboleth.authn.Krb5.ServicePrincipal" class="java.lang.String" c:_0="SERVICE/principal" />
+    <bean id="shibboleth.authn.Krb5.Keytab" class="java.lang.String" c:_0="%{idp.home}/credentials/keytab" />
+    -->
     
     <alias name="ValidateUsernamePasswordAgainstKerberos" alias="ValidateUsernamePassword"/>
 

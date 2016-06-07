@@ -15,7 +15,7 @@
     for compatibility with V2 audit logging.
     -->
     <util:map id="shibboleth.AuditFormattingMap">
-        <entry key="Shibboleth-Audit" value="%T|%b|%I|%SP|%P|%IDP|%bb|%III|%u|%ac|%attr|%n|%i" />
+        <entry key="Shibboleth-Audit" value="%T|%b|%I|%SP|%P|%IDP|%bb|%III|%u|%ac|%attr|%n|%i|" />
     </util:map>
 
     <!-- Allows auditing to be disabled selectively for particular profiles/flows. -->
@@ -57,6 +57,13 @@
             </map>
         </property>
     </bean>
+
+    <bean id="shibboleth.LogoutRequestAuditExtractors" parent="shibboleth.DefaultLogoutRequestAuditExtractors" lazy-init="true">
+        <property name="sourceMap">
+            <map merge="true">
+            </map>
+        </property>
+    </bean>
     
     <bean id="shibboleth.LogoutAuditExtractors" parent="shibboleth.DefaultLogoutAuditExtractors" lazy-init="true">
         <property name="sourceMap">
@@ -66,6 +73,27 @@
     </bean>
 
     <bean id="shibboleth.ErrorViewAuditExtractors" parent="shibboleth.DefaultErrorViewAuditExtractors" lazy-init="true">
+        <property name="sourceMap">
+            <map merge="true">
+            </map>
+        </property>
+    </bean>
+
+    <bean id="shibboleth.CASLoginAuditExtractors" parent="shibboleth.DefaultCASLoginAuditExtractors" lazy-init="true">
+        <property name="sourceMap">
+            <map merge="true">
+            </map>
+        </property>
+    </bean>
+
+    <bean id="shibboleth.CASValidationAuditExtractors" parent="shibboleth.DefaultCASValidationAuditExtractors" lazy-init="true">
+        <property name="sourceMap">
+            <map merge="true">
+            </map>
+        </property>
+    </bean>
+
+    <bean id="shibboleth.CASProxyAuditExtractors" parent="shibboleth.DefaultCASProxyAuditExtractors" lazy-init="true">
         <property name="sourceMap">
             <map merge="true">
             </map>

@@ -34,4 +34,20 @@
     </util:list>
     -->
 
+    <!--
+    If you need to define and inject custom Java object(s) into the various views used throughout the
+    system (errors, login, logout, etc.), you can uncomment and define the bean below to be of any
+    type required. It will appear in the view scope as a variable named "custom".
+    
+    The example below defines the bean as a map, which allows you to inject multiple objects under
+    named keys to expand the feature to support multiple injected objects.
+    -->
+    
+    <!--
+    <util:map id="shibboleth.CustomViewContext">
+        <entry key="foo" value="bar"/>
+    </util:map>
+    -->
+    
+    
 </beans>

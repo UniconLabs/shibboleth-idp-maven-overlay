@@ -37,17 +37,6 @@
     <bean id="ResolveAttributesPredicate"
         class="net.shibboleth.idp.saml.profile.config.logic.ResolveAttributesProfileConfigPredicate" />
 
-    <bean id="AddAttributeStatementToAssertion"
-            class="net.shibboleth.idp.saml.saml1.profile.impl.AddAttributeStatementToAssertion" scope="prototype">
-        <property name="activationCondition">
-            <bean class="net.shibboleth.idp.saml.profile.config.logic.IncludeAttributeStatementPredicate" />
-        </property>
-        <property name="identifierGeneratorLookupStrategy">
-            <bean class="net.shibboleth.idp.profile.config.navigate.IdentifierGenerationStrategyLookupFunction"
-                p:defaultIdentifierGenerationStrategy-ref="shibboleth.DefaultIdentifierGenerationStrategy" />
-        </property>
-    </bean>
-
     <bean id="AddNameIdentifierToSubjects"
             class="org.opensaml.saml.saml1.profile.impl.AddNameIdentifierToSubjects" scope="prototype">
         <property name="formatLookupStrategy">
@@ -78,11 +67,18 @@
             class="org.opensaml.messaging.handler.impl.BasicMessageHandlerChain" scope="prototype">
         <property name="handlers">
             <list>
-                <!-- TODO outbound handlers -->
                 <bean class="org.opensaml.saml.common.binding.impl.SAMLOutboundDestinationHandler" scope="prototype"/>
                 <bean class="org.opensaml.saml.common.binding.security.impl.EndpointURLSchemeSecurityHandler" scope="prototype"/>
-                <bean class="org.opensaml.saml.common.binding.security.impl.SAMLOutboundProtocolMessageSigningHandler"
-                    scope="prototype" p:signErrorResponses="%{idp.errors.signed:true}" />
+                <bean class="org.opensaml.saml.common.binding.security.impl.SAMLOutboundProtocolMessageSigningHandler" scope="prototype"
+                        p:signErrorResponses="%{idp.errors.signed:true}">
+                    <property name="activationCondition">
+                        <bean parent="shibboleth.Conditions.NOT">
+                            <constructor-arg>
+                                <bean class="org.opensaml.saml.common.messaging.logic.SignatureCapableBindingPredicate" />
+                            </constructor-arg>
+                        </bean>
+                    </property>
+                </bean>
             </list>
         </property>
     </bean>

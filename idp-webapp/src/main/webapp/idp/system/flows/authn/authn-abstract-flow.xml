@@ -6,6 +6,9 @@
     <!-- Rudimentary impediment to direct execution of subflow. -->
     <input name="calledAsSubflow" type="boolean" required="true" />
 
+    <!-- Indicates another login flow has called one as a subflow. -->
+    <input name="calledAsExtendedFlow" type="boolean" />
+
     <!-- Defines the possible end-state events, and a global transition rule. -->
 
     <!-- Successful completion of subflow. -->
@@ -18,6 +21,7 @@
     <end-state id="InvalidCredentials" />
     <end-state id="InvalidProfileContext" />
     <end-state id="InvalidSubjectContext" />
+    <end-state id="InvalidSubjectCanonicalizationContext" />
     <end-state id="NoCredentials" />
     <end-state id="NoPassive" />
     <end-state id="NoPotentialFlow" />

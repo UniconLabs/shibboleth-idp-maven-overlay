@@ -7,11 +7,9 @@
            http://www.springframework.org/schema/beans/spring-beans.xsd"
        default-init-method="initialize">
 
-    <import resource="../abstractValidate/abstractValidate-beans.xml" />
-
     <!-- Action beans -->
-    <bean id="buildProxyChainAction"
-          class="net.shibboleth.idp.cas.flow.BuildProxyChainAction"
-          c:ticketService-ref="cas.ticketService" />
+    <bean id="BuildProxyChain"
+          class="net.shibboleth.idp.cas.flow.impl.BuildProxyChainAction"
+          c:ticketService-ref="cas.TicketService" />
 
 </beans>

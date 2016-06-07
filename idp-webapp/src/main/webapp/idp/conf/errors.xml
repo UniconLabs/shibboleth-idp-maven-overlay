@@ -14,8 +14,7 @@
 
     <!-- Map local events to alternate view templates. -->
     <util:map id="shibboleth.EventViewMap">
-        <!-- Handles final result of SAML 2 LogoutResponse messages. -->
-        <entry key="LogoutResponse" value="logout-response" />
+        <!-- <entry key="EventToChange" value="viewname" /> -->
     </util:map>
 
     <!--
@@ -84,6 +83,7 @@
         
         <entry key="InvalidSubject" value-ref="shibboleth.SAML2Status.UnknownPrincipal" />
         <entry key="SubjectCanonicalizationError" value-ref="shibboleth.SAML2Status.UnknownPrincipal" />
+        <entry key="SessionNotFound" value-ref="shibboleth.SAML2Status.UnknownPrincipal" />
         
         <entry key="InvalidNameIDPolicy" value-ref="shibboleth.SAML2Status.InvalidNameIDPolicy" />
         

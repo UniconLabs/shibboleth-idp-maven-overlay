@@ -25,12 +25,13 @@
             p:activationCondition-ref="shibboleth.authn.External.populateUIInfo"
             p:httpServletRequest-ref="shibboleth.HttpServletRequest">
         <property name="fallbackLanguages">
-            <bean parent="shibboleth.CommaDelimStringArray" c:_0="%{idp.ui.fallbackLanguages:}" />
+            <bean parent="shibboleth.CommaDelimStringArray" c:_0="#{'%{idp.ui.fallbackLanguages:}'.trim()}" />
         </property>
     </bean>
 
     <bean id="ValidateExternalAuthentication"
             class="net.shibboleth.idp.authn.impl.ValidateExternalAuthentication" scope="prototype"
+            p:addDefaultPrincipals="#{getObject('shibboleth.authn.External.addDefaultPrincipals') != null ? getObject('shibboleth.authn.External.addDefaultPrincipals') : true}"
             p:classifiedMessages-ref="shibboleth.authn.External.ClassifiedMessageMap"
             p:resultCachingPredicate="#{getObject('shibboleth.authn.External.resultCachingPredicate')}" />
 

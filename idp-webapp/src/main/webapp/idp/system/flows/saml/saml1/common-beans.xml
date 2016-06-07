@@ -49,6 +49,17 @@
         </property>
     </bean>
 
+    <bean id="AddAttributeStatementToAssertion"
+            class="net.shibboleth.idp.saml.saml1.profile.impl.AddAttributeStatementToAssertion" scope="prototype">
+        <property name="activationCondition">
+            <bean class="net.shibboleth.idp.saml.profile.config.logic.IncludeAttributeStatementPredicate" />
+        </property>
+        <property name="identifierGeneratorLookupStrategy">
+            <bean class="net.shibboleth.idp.profile.config.navigate.IdentifierGenerationStrategyLookupFunction"
+                p:defaultIdentifierGenerationStrategy-ref="shibboleth.DefaultIdentifierGenerationStrategy" />
+        </property>
+    </bean>
+
     <bean id="InitializeOutboundMessageContextForError"
             class="net.shibboleth.idp.saml.profile.impl.InitializeOutboundMessageContextForError" scope="prototype">
         <property name="outboundBinding">

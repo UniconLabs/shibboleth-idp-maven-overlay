@@ -46,7 +46,27 @@ Class-Path: opensaml-core-3.1.1.jar joda-time-2.7.jar java-support-7.1
  pl-3.1.3-20150701.054342-1.jar idp-session-impl-3.1.3-20150701.053649
  -1.jar idp-ui-3.1.3-20150701.054501-1.jar idp-consent-3.1.3-20150701.
  054427-1.jar jcl-over-slf4j-1.7.10.jar cas-client-core-3.3.3.jar ant-
- 1.9.4.jar ant-launcher-1.9.4.jar javax.servlet-api-3.1.0.jar
+ 1.9.4.jar ant-launcher-1.9.4.jar javax.servlet-api-3.1.0.jar idp-attr
+ ibute-api-3.2.0.jar idp-attribute-filter-api-3.2.0.jar idp-core-3.2.0
+ .jar idp-attribute-filter-impl-3.2.0.jar idp-saml-api-3.2.0.jar idp-p
+ rofile-api-3.2.0.jar idp-attribute-resolver-api-3.2.0.jar idp-authn-a
+ pi-3.2.0.jar idp-session-api-3.2.0.jar idp-attribute-resolver-impl-3.
+ 2.0.jar idp-attribute-resolver-spring-3.2.0.jar idp-saml-impl-3.2.0.j
+ ar idwsfconsumer-1.0.0.jar log4j-over-slf4j-1.7.12.jar idp-schema-3.2
+ .0.jar idp-profile-spring-3.2.0.jar idp-profile-impl-3.2.0.jar idp-at
+ tribute-filter-spring-3.2.0.jar idp-authn-impl-3.2.0.jar idp-consent-
+ api-3.2.0.jar idp-cas-api-3.2.0.jar idp-cas-impl-3.2.0.jar idp-sessio
+ n-impl-3.2.0.jar idp-ui-3.2.0.jar idp-consent-impl-3.2.0.jar idp-attr
+ ibute-api-3.2.1.jar idp-core-3.2.1.jar idp-saml-api-3.2.1.jar idp-pro
+ file-api-3.2.1.jar idp-attribute-resolver-api-3.2.1.jar idp-authn-api
+ -3.2.1.jar UserAgentUtils-1.18.jar idp-session-api-3.2.1.jar idp-attr
+ ibute-filter-api-3.2.1.jar jcommander-1.48.jar idp-attribute-filter-i
+ mpl-3.2.1.jar idp-attribute-resolver-impl-3.2.1.jar idp-attribute-res
+ olver-spring-3.2.1.jar idp-saml-impl-3.2.1.jar idp-schema-3.2.1.jar i
+ dp-profile-spring-3.2.1.jar idp-profile-impl-3.2.1.jar idp-attribute-
+ filter-spring-3.2.1.jar idp-authn-impl-3.2.1.jar idp-consent-api-3.2.
+ 1.jar idp-cas-api-3.2.1.jar idp-cas-impl-3.2.1.jar idp-session-impl-3
+ .2.1.jar idp-ui-3.2.1.jar idp-consent-impl-3.2.1.jar
 Build-Jdk: 1.7.0_76
 Created-By: Apache Maven 3.2.5
 

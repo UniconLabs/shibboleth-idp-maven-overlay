@@ -20,7 +20,9 @@
         p:unverifiedConfiguration-ref="shibboleth.UnverifiedRelyingParty"
         p:defaultConfiguration-ref="shibboleth.DefaultRelyingParty"
         p:relyingPartyConfigurations-ref="shibboleth.RelyingPartyOverrides"
-        p:defaultSecurityConfiguration-ref="%{idp.security.config:shibboleth.DefaultSecurityConfiguration}" />
+        p:defaultSecurityConfiguration-ref="%{idp.security.config:shibboleth.DefaultSecurityConfiguration}" 
+        p:signingCredentials="#{getObject('shibboleth.SigningCredentials')}"
+        p:encryptionCredentials="#{getObject('shibboleth.EncryptionCredentials')}" />
 
     <!-- Parent bean for generic RelyingParty overrides that establishes defaults. -->
     <bean id="RelyingParty" abstract="true" class="net.shibboleth.idp.relyingparty.RelyingPartyConfiguration"
@@ -39,12 +41,11 @@
     <!-- Parent bean for RelyingParty overrides based on activation by tag. -->
     <bean id="RelyingPartyByTag" abstract="true"
         class="net.shibboleth.idp.saml.relyingparty.impl.RelyingPartyConfigurationSupport" factory-method="byTag"
-        p:responderId-ref="entityID" p:detailedErrors="%{idp.errors.detailed:false}" c:trim="false" />
-        
-    <bean id="TagCandidate" abstract="true"
-        class="org.opensaml.saml.common.profile.logic.EntityAttributesPredicate.Candidate"
-        c:format="#{null}" />
+        p:responderId-ref="entityID" p:detailedErrors="%{idp.errors.detailed:false}" c:trim="false" c:matchAll="false" />    
 
+    <bean id="TagCandidate" abstract="true"
+        class="org.opensaml.saml.common.profile.logic.EntityAttributesPredicate.Candidate" />
+        
     <!-- Default Profile Configurations, also usable as parent beans in overrides. -->
     
     <bean id="Shibboleth.SSO"
@@ -87,21 +88,20 @@
         p:inboundInterceptorFlows="security-policy/saml-soap"
         p:encryptionOptional="%{idp.encryption.optional:false}" />
 
-    <!--
-    TBD: not yet implemented    
     <bean id="Liberty.SSOS"
-        class="net.shibboleth.idp.saml.idwsf.profile.config.SSOSProfileConfiguration" />
-    -->
+        class="net.shibboleth.idp.saml.idwsf.profile.config.SSOSProfileConfiguration" 
+            p:inboundInterceptorFlows="security-policy/saml2-idwsf-ssos" 
+            p:encryptionOptional="%{idp.encryption.optional:false}" />
 
     <bean id="CAS.LoginConfiguration"
-          class="net.shibboleth.idp.cas.config.LoginConfiguration" />
+          class="net.shibboleth.idp.cas.config.impl.LoginConfiguration" />
 
     <bean id="CAS.ProxyConfiguration"
-          class="net.shibboleth.idp.cas.config.ProxyConfiguration" />
+          class="net.shibboleth.idp.cas.config.impl.ProxyConfiguration" />
 
     <!-- Ticket validity period applies to proxy-granting tickets created upon successful proxy callback validation -->
     <bean id="CAS.ValidateConfiguration"
-          class="net.shibboleth.idp.cas.config.ValidateConfiguration"
+          class="net.shibboleth.idp.cas.config.impl.ValidateConfiguration"
           p:ticketValidityPeriod="PT12H" />
 
     <!-- Artifact Configuration Defaults -->
@@ -120,17 +120,17 @@
     <bean id="shibboleth.DefaultSecurityConfiguration" class="net.shibboleth.idp.profile.config.SecurityConfiguration">
     
         <property name="signatureSigningConfiguration">
-            <ref bean="%{idp.signing.config:shibboleth.SigningConfiguration.SHA256}" />
+            <ref bean="#{'%{idp.signing.config:shibboleth.SigningConfiguration.SHA256}'.trim()}" />
         </property>
         
         <property name="signatureValidationConfiguration">
             <bean parent="shibboleth.BasicSignatureValidationConfiguration" 
-                p:signatureTrustEngine-ref="%{idp.trust.signatures:shibboleth.ChainingSignatureTrustEngine}" />
+                p:signatureTrustEngine-ref="#{'%{idp.trust.signatures:shibboleth.ChainingSignatureTrustEngine}'.trim()}" />
         </property>
 
         <property name="clientTLSValidationConfiguration">
             <bean parent="shibboleth.BasicClientTLSValidationConfiguration"
-                p:x509TrustEngine-ref="%{idp.trust.certificates:shibboleth.ChainingX509TrustEngine}" />
+                p:x509TrustEngine-ref="#{'%{idp.trust.certificates:shibboleth.ChainingX509TrustEngine}'.trim()}" />
         </property>
         
         <property name="encryptionConfiguration">

@@ -44,6 +44,7 @@
             <evaluate expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)" result="requestScope.encoder" />
             <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="requestScope.request" />
             <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="requestScope.response" />
+            <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.CustomViewContext') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.CustomViewContext') : null" result="requestScope.custom" />
         </on-entry>
     </end-state>
     
@@ -82,6 +83,7 @@
     <!-- We need to trap non-proceed transitions in these actions to avoid an infinite loop. -->
 
     <action-state id="HandleError">
+        <evaluate expression="LogEvent" />
         <evaluate expression="InitializeOutboundMessageContextForError" />
         <evaluate expression="AddLogoutResponse" />
         <evaluate expression="AddInResponseToToResponse" />

@@ -62,7 +62,7 @@ and adjust the values of hostname, entityId, passwords, etc. Then from the comma
 ### Initial installs
 
 ```bash
-mvn clean package -P new
+mvn clean install -P new
 ```
 
 This will wipe out any previous files inside `credentials` and `metadata` directories and start anew.
@@ -71,7 +71,7 @@ This will wipe out any previous files inside `credentials` and `metadata` direct
 ### Subsequent installs
 
 ```bash
-mvn clean package
+mvn clean install
 ```
 
 ### Artifact Signature Verification
@@ -94,19 +94,36 @@ Note that dependency resolution is only limited to the following repositories:
 Maven central is turned off.
 
 ## Run
-Navigate to the `idp-webapp-overlay` module and run the following command:
+Run the following command:
 
 ```bash
-mvn validate
+mvn clean install verify -Dhost=jetty
+```
+
+Or if you want a somewhat faster build, run:
+
+```bash
+mvn clean install verify -Dhost=jetty --projects idp-webapp-overlay -T 5
 ```
 
 This will spin up an embedded Jetty server to load the IdP context. Remote debugging
 is available under port 5000 from your IDE.
 
 ## Versions
-- [Shibboleth Identity Provider v3.1.3-SNAPSHOT](https://wiki.shibboleth.net/confluence/display/IDP30/Home)
+- [Shibboleth Identity Provider v3.2.1](https://wiki.shibboleth.net/confluence/display/IDP30/Home)
 - Apache Maven v3 (required)
 - JDK 8 (required)
 
 ## Build Status
 * [![Build Status](https://secure.travis-ci.org/UniconLabs/shibboleth-idp-webapp.png)](http://travis-ci.org/UniconLabs/shibboleth-idp-webapp)
+
+## Overlaid Settings
+
+```properties
+idp.hostname=mmoayyed.unicon.net
+idp.entityID=https://mmoayyed.unicon.net/idp/shibboleth
+idp.scope=unicon.net
+idp.sealer.storeType = JCEKS
+idp.sealer.aliasBase = secret
+idp.keystore.password=password
+```

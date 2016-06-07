@@ -40,14 +40,6 @@
 
     <alias name="shibboleth.OutgoingSOAPBindings" alias="shibboleth.OutgoingBindings"/>
 
-    <bean id="AddAttributeStatementToAssertion"
-            class="net.shibboleth.idp.saml.saml2.profile.impl.AddAttributeStatementToAssertion" scope="prototype">
-        <property name="identifierGeneratorLookupStrategy">
-            <bean class="net.shibboleth.idp.profile.config.navigate.IdentifierGenerationStrategyLookupFunction"
-                p:defaultIdentifierGenerationStrategy-ref="shibboleth.DefaultIdentifierGenerationStrategy" />
-        </property>
-    </bean>
-
     <bean id="CopyNameIDFromRequest"
             class="org.opensaml.saml.saml2.profile.impl.CopyNameIDFromRequest" scope="prototype" />
 
@@ -63,11 +55,18 @@
     <bean id="shibboleth.PreEncodeMessageHandler"
             class="org.opensaml.messaging.handler.impl.BasicMessageHandlerChain" scope="prototype">
         <property name="handlers">
-            <util:list>
-                <!-- TODO outbound handlers -->
-                <bean class="org.opensaml.saml.common.binding.security.impl.SAMLOutboundProtocolMessageSigningHandler"
-                    scope="prototype" p:signErrorResponses="%{idp.errors.signed:true}" />
-            </util:list>
+            <list>
+                <bean class="org.opensaml.saml.common.binding.security.impl.SAMLOutboundProtocolMessageSigningHandler" scope="prototype"
+                        p:signErrorResponses="%{idp.errors.signed:true}">
+                    <property name="activationCondition">
+                        <bean parent="shibboleth.Conditions.NOT">
+                            <constructor-arg>
+                                <bean class="org.opensaml.saml.common.messaging.logic.SignatureCapableBindingPredicate" />
+                            </constructor-arg>
+                        </bean>
+                    </property>
+                </bean>
+            </list>
         </property>
     </bean>
 

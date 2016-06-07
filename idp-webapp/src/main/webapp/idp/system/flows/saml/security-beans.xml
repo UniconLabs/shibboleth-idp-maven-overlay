@@ -166,6 +166,22 @@
         </property>
     </bean>
 
+    <bean id="OptionalCheckMandatoryAuthentication"
+            class="net.shibboleth.idp.profile.impl.WebFlowMessageHandlerAdaptor" scope="prototype"
+            c:executionDirection="INBOUND"
+            p:activationCondition="%{idp.logout.authenticated:true}">
+        <constructor-arg name="messageHandler">
+            <bean class="org.opensaml.messaging.handler.impl.CheckMandatoryAuthentication" scope="prototype">
+                <property name="authenticationLookupStrategy">
+                    <bean class="org.opensaml.saml.common.messaging.context.navigate.SAMLMessageContextAuthenticationFunction" />
+                </property>
+            </bean>
+        </constructor-arg>
+        <property name="errorEvent">
+            <util:constant static-field="org.opensaml.profile.action.EventIds.MESSAGE_AUTHN_ERROR" />
+        </property>
+    </bean>
+
     <bean id="SAML2AuthnRequestsSignedSecurityHandler"
             class="net.shibboleth.idp.profile.impl.WebFlowMessageHandlerAdaptor" scope="prototype"
             c:executionDirection="INBOUND">

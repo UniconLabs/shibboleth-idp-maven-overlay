@@ -2,9 +2,53 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd">
 
-    <action-state id="DoLogout">
+    <action-state id="InitializeProfileRequestContext">
         <evaluate expression="InitializeProfileRequestContext" />
+        <evaluate expression="'proceed'" />
+        
+        <transition on="proceed" to="PopulateClientStorageLoadContext" />
+    </action-state>
+
+    <!-- Load client storage if needed. -->
+    
+    <action-state id="PopulateClientStorageLoadContext">
+        <evaluate expression="PopulateClientStorageLoadContext" />
+        <evaluate expression="'proceed'" />
+
+        <transition on="proceed" to="ClientStorageLoad" />
+        <transition on="NoLoadNeeded" to="DoLogout" />
+    </action-state>
+    
+    <subflow-state id="ClientStorageLoad" subflow="client-storage/read">
+        <input name="calledAsSubflow" value="true" />
+        <transition on="proceed" to="DoLogout"/>
+    </subflow-state>
+
+    <action-state id="DoLogout">
         <evaluate expression="ProcessLogout" />
+        <evaluate expression="'proceed'" />
+        
+        <transition on="proceed" to="PopulateClientStorageSaveContext" />
+    </action-state>
+
+    <!-- We may need to save client storage. -->
+    
+    <action-state id="PopulateClientStorageSaveContext">
+        <evaluate expression="PopulateClientStorageSaveContext" />
+        <evaluate expression="'proceed'" />
+
+        <transition on="proceed" to="ClientStorageSave" />
+        <transition on="NoSaveNeeded" to="CompleteLogout" />
+    </action-state>
+    
+    <subflow-state id="ClientStorageSave" subflow="client-storage/write">
+        <input name="calledAsSubflow" value="true" />
+        <transition on="proceed" to="CompleteLogout"/>
+    </subflow-state>
+
+    <!-- Continue the logout process. -->
+
+    <action-state id="CompleteLogout">
         <evaluate expression="LogoutPopulateAuditContext" />
         <evaluate expression="PopulateMultiRPContextFromLogoutContext" />
         <evaluate expression="'proceed'" />
@@ -26,12 +70,44 @@
         
         <transition on="proceed" to="NextRelyingPartyContext" />
     </action-state>
-    
-    <!-- Terminus -->
 
-    <end-state id="LogoutView" view="logout">
+    <view-state id="LogoutView" view="logout">
         <on-entry>
             <evaluate expression="WriteAuditLog" />
+            <evaluate expression="environment" result="viewScope.environment" />
+            <evaluate expression="opensamlProfileRequestContext" result="viewScope.profileRequestContext" />
+            <evaluate expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.session.context.LogoutContext))" result="viewScope.logoutContext" />
+            <evaluate expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.profile.context.MultiRelyingPartyContext))" result="viewScope.multiRPContext" />
+            <evaluate expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)" result="viewScope.encoder" />
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="viewScope.request" />
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="viewScope.response" />
+            <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.CustomViewContext') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.CustomViewContext') : null" result="viewScope.custom" />
+        </on-entry>
+        <transition on="propagate" to="LogoutPropagateView" />
+        <transition on="end" to="LogoutCompleteView" />
+    </view-state>
+
+    <!-- Terminus -->
+
+    <end-state id="LogoutPropagateView" view="logout-propagate">
+        <on-entry>
+            <evaluate expression="SaveLogoutContext" />
+            <evaluate expression="environment" result="requestScope.environment" />
+            <evaluate expression="opensamlProfileRequestContext" result="requestScope.profileRequestContext" />
+            <evaluate expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.session.context.LogoutContext))" result="requestScope.logoutContext" />
+            <evaluate expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.profile.context.MultiRelyingPartyContext))" result="requestScope.multiRPContext" />
+            <evaluate expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)" result="requestScope.htmlEncoder" />
+            <evaluate expression="T(java.net.URLEncoder)" result="requestScope.urlEncoder" />
+            <evaluate expression="T(org.cryptacular.util.CodecUtil)" result="requestScope.codecUtil" />
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="requestScope.request" />
+            <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="requestScope.response" />
+            <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.LogoutPropagationFlowSelector')" result="requestScope.flowSelector" />
+            <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.CustomViewContext') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.CustomViewContext') : null" result="requestScope.custom" />
+        </on-entry>
+    </end-state>
+
+    <end-state id="LogoutCompleteView" view="logout-complete">
+        <on-entry>
             <evaluate expression="environment" result="requestScope.environment" />
             <evaluate expression="opensamlProfileRequestContext" result="requestScope.profileRequestContext" />
             <evaluate expression="opensamlProfileRequestContext.getSubcontext(T(net.shibboleth.idp.session.context.LogoutContext))" result="requestScope.logoutContext" />
@@ -39,6 +115,7 @@
             <evaluate expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)" result="requestScope.encoder" />
             <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="requestScope.request" />
             <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="requestScope.response" />
+            <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.CustomViewContext') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.CustomViewContext') : null" result="requestScope.custom" />
         </on-entry>
     </end-state>
 
@@ -55,6 +132,9 @@
     <!-- Unsuccessful terminal states. -->
     
     <decision-state id="HandleErrorWithView">
+        <on-entry>
+            <evaluate expression="LogEvent" />
+        </on-entry>
         <if test="flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.LocalEventMap').containsKey(currentEvent.id) and flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.LocalEventMap').get(currentEvent.id)"
             then="AuditedErrorView" else="ErrorView" />
     </decision-state>
@@ -68,6 +148,7 @@
             <evaluate expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)" result="requestScope.encoder" />
             <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="requestScope.request" />
             <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="requestScope.response" />
+            <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.CustomViewContext') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.CustomViewContext') : null" result="requestScope.custom" />
         </on-entry>
         <exception-handler bean="RethrowingFlowExecutionExceptionHandler"/>
     </end-state>
@@ -79,6 +160,7 @@
             <evaluate expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)" result="requestScope.encoder" />
             <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="requestScope.request" />
             <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="requestScope.response" />
+            <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.CustomViewContext') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.CustomViewContext') : null" result="requestScope.custom" />
         </on-entry>
         <exception-handler bean="RethrowingFlowExecutionExceptionHandler"/>
     </end-state>

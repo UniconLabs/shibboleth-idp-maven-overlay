@@ -48,11 +48,18 @@
     <bean id="shibboleth.PreEncodeMessageHandler"
             class="org.opensaml.messaging.handler.impl.BasicMessageHandlerChain" scope="prototype">
         <property name="handlers">
-            <util:list>
-                <!-- TODO outbound handlers -->
-                <bean class="org.opensaml.saml.common.binding.security.impl.SAMLOutboundProtocolMessageSigningHandler"
-                    scope="prototype" p:signErrorResponses="%{idp.errors.signed:true}" />
-            </util:list>
+            <list>
+                <bean class="org.opensaml.saml.common.binding.security.impl.SAMLOutboundProtocolMessageSigningHandler" scope="prototype"
+                        p:signErrorResponses="%{idp.errors.signed:true}">
+                    <property name="activationCondition">
+                        <bean parent="shibboleth.Conditions.NOT">
+                            <constructor-arg>
+                                <bean class="org.opensaml.saml.common.messaging.logic.SignatureCapableBindingPredicate" />
+                            </constructor-arg>
+                        </bean>
+                    </property>
+                </bean>
+            </list>
         </property>
     </bean>
 

@@ -39,7 +39,8 @@
             class="net.shibboleth.idp.saml.nameid.impl.NameIDCanonicalization" scope="prototype">
         <property name="decoder">
             <bean class="net.shibboleth.idp.saml.nameid.impl.StoredPersistentIdDecoder"
-                p:persistentIdStore="#{getObject('%{idp.persistentId.store:null}')}" />
+                p:persistentIdStore="#{getObject('%{idp.persistentId.store:undefined}'.trim())}"
+                p:dataSource="#{getObject('%{idp.persistentId.dataSource:undefined}'.trim())}" />
         </property>
     </bean>
 

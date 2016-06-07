@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://www.springframework.org/schema/webflow http://www.springframework.org/schema/webflow/spring-webflow.xsd"
     parent="security-policy.abstract">
 
-    <!-- Default inbound security processing for front-channel SAML 2 SLO profile. -->
+    <!-- Default inbound security processing for SAML 2 SLO profile. -->
 
     <action-state id="SAML2SLOSecurityPolicy">
         <evaluate expression="ReceivedEndpointSecurityHandler" />
@@ -14,7 +14,7 @@
         <evaluate expression="SAML2HTTPRedirectDeflateSignatureSecurityHandler" />
         <evaluate expression="SAML2HTTPPostSimpleSignSecurityHandler" />
         <evaluate expression="CheckMandatoryIssuer" />
-        <evaluate expression="CheckMandatoryAuthentication" />
+        <evaluate expression="OptionalCheckMandatoryAuthentication" />
         <evaluate expression="ExtractChannelBindingsExtensionsHandler" />
         <evaluate expression="'proceed'" />
 

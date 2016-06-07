@@ -87,6 +87,6 @@
     -->
     
     <bean id="shibboleth.MetadataSignatureValidationStaticCriteria" 
-        class="net.shibboleth.idp.profile.spring.relyingparty.metadata.filter.SignatureValidationCriteriaSetFactoryBean" />
+        class="net.shibboleth.idp.profile.spring.relyingparty.metadata.filter.impl.SignatureValidationCriteriaSetFactoryBean" />
     
 </beans>

@@ -48,6 +48,30 @@
                 </constructor-arg>
             </bean>
         </property>
+        <property name="activationCondition">
+            <bean parent="shibboleth.Conditions.NOT">
+                <constructor-arg>
+                    <bean parent="shibboleth.Conditions.Expression">
+                        <constructor-arg>
+                            <value>
+                                #profileContext.getProfileId().equals('http://shibboleth.net/ns/profiles/liberty/ssos')
+                            </value>
+                        </constructor-arg>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="AddAttributeStatementToAssertion"
+            class="net.shibboleth.idp.saml.saml2.profile.impl.AddAttributeStatementToAssertion" scope="prototype">
+        <property name="activationCondition">
+            <bean class="net.shibboleth.idp.saml.profile.config.logic.IncludeAttributeStatementPredicate" />
+        </property>
+        <property name="identifierGeneratorLookupStrategy">
+            <bean class="net.shibboleth.idp.profile.config.navigate.IdentifierGenerationStrategyLookupFunction"
+                p:defaultIdentifierGenerationStrategy-ref="shibboleth.DefaultIdentifierGenerationStrategy" />
+        </property>
     </bean>
 
     <bean id="InitializeOutboundMessageContextForError"
@@ -86,10 +110,24 @@
             </list>
         </property>
     </bean>
+    
+    <bean id="EncryptToSelfParametersStrategy" class="org.opensaml.saml.security.impl.InlineSelfEncryptionParametersStrategy">
+        <constructor-arg>
+            <bean class="net.shibboleth.idp.relyingparty.impl.EncryptionCredentialsResolver" 
+                c:_0-ref="shibboleth.RelyingPartyResolverService" />
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="org.opensaml.xmlsec.impl.BasicEncryptionParametersResolver" />
+        </constructor-arg>
+        <constructor-arg ref="shibboleth.SelfEncryptionConfigurationLookup" />
+    </bean>
 
     <bean id="EncryptNameIDs"
             class="org.opensaml.saml.saml2.profile.impl.EncryptNameIDs" scope="prototype"
-            p:recipientLookupStrategy-ref="shibboleth.RelyingPartyIdLookup.Simple">
+            p:recipientLookupStrategy-ref="shibboleth.RelyingPartyIdLookup.Simple"
+            p:encryptToSelf-ref="shibboleth.Conditions.IssuingDelegatedAssertion"
+            p:encryptToSelfParametersStrategy-ref="EncryptToSelfParametersStrategy"
+            p:selfRecipientLookupStrategy-ref="shibboleth.ResponderIdLookup.Simple" >
         <property name="encryptionContextLookupStrategy">
             <bean class="com.google.common.base.Functions" factory-method="compose"
                 c:g-ref="shibboleth.ChildLookup.EncryptionParameters"

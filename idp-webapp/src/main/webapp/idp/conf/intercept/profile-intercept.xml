@@ -14,11 +14,11 @@
 
     <!--
     Intercept flows are used at various injection points to modify processing. This is the master list
-    of flows available, but flows are enabled by specifying them in various profile configuration beans
-    via relying-party.xml 
+    of flows available that provide interesting features to deployers, but flows are actually enabled by
+    specifying them in various profile configuration beans via relying-party.xml 
     
     This list of flows is merged with a built-in set defined in a system configuration file, and may be
-    empty, but should not be removed.
+    empty, but should not be removed. You must add your own custom flows to this list if you create any.
     -->
     
     <bean id="shibboleth.AvailableInterceptFlows" parent="shibboleth.DefaultInterceptFlows" lazy-init="true">

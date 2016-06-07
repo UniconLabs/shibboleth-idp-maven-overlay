@@ -6,7 +6,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-                           http://www.springframework.org/schema/webflow-config http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.3.xsd">
+                           http://www.springframework.org/schema/webflow-config http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.4.xsd">
 
     <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer"
         p:placeholderPrefix="%{" p:placeholderSuffix="}" />
@@ -15,7 +15,7 @@
     Define custom flows by using the filesystem directly. Flows will be named based
     on the directories between the base-path and the flow file ending in -flow.xml
     -->
-    <webflow:flow-registry id="flowRegistry" base-path="%{idp.home}/flows" flow-builder-services="flowBuilderServices">
+    <webflow:flow-registry id="flowRegistry" base-path="%{idp.webflows:%{idp.home}/flows}" flow-builder-services="flowBuilderServices">
         <webflow:flow-location-pattern value="/**/*-flow.xml" />
 
         <!-- Abstract base flow for admin flows. -->
@@ -34,6 +34,10 @@
 
         <!-- Logout propagation master flow. -->
         <webflow:flow-location id="PropagateLogout" path="../system/flows/logout/logout-propagation-flow.xml" />
+
+        <!-- Logout propagation delegate flows. -->
+        <webflow:flow-location id="logoutprop/cas" path="../system/flows/logout/propagation/cas-flow.xml" />
+        <webflow:flow-location id="logoutprop/saml2" path="../system/flows/logout/propagation/saml2-flow.xml" />
 
         <!-- Abstract flows underpinning SAML profiles. -->
         <webflow:flow-location id="saml.abstract" path="../system/flows/saml/saml-abstract-flow.xml" />
@@ -56,6 +60,9 @@
         <webflow:flow-location id="SAML2/SOAP/SLO" path="../system/flows/saml/saml2/slo-back-flow.xml" />
         <webflow:flow-location id="SAML2/SOAP/AttributeQuery" path="../system/flows/saml/saml2/attribute-query-flow.xml" />
         <webflow:flow-location id="SAML2/SOAP/ArtifactResolution" path="../system/flows/saml/saml2/artifact-resolution-flow.xml" />
+        
+        <!-- Liberty IDWSF SSOS flow (for SAML 2 delegation) -->
+        <webflow:flow-location id="IDWSF/SSOS" path="../system/flows/saml/saml2/idwsf-ssos-flow.xml" />
 
         <!-- Master flow for authentication. -->
         <webflow:flow-location id="authn.events" path="../conf/authn/authn-events-flow.xml" />
@@ -70,8 +77,9 @@
         <webflow:flow-location id="authn/RemoteUser" path="../system/flows/authn/remoteuser-authn-flow.xml" />
         <webflow:flow-location id="authn/X509" path="../system/flows/authn/x509-authn-flow.xml" />
         <webflow:flow-location id="authn/X509Internal" path="../system/flows/authn/x509-internal-authn-flow.xml" />
+        <webflow:flow-location id="authn/SPNEGO" path="../system/flows/authn/spnego-authn-flow.xml" />
         <webflow:flow-location id="authn/External" path="../system/flows/authn/external-authn-flow.xml" />
-
+  
         <!-- Master flows for post-authn and SAML subject c14n. -->
         <webflow:flow-location id="c14n.events" path="../conf/c14n/subject-c14n-events-flow.xml" />
         <webflow:flow-location id="c14n.abstract" path="../system/flows/c14n/subject-c14n-abstract-flow.xml" />
@@ -113,21 +121,34 @@
         <webflow:flow-location id="intercept/security-policy/saml2-sso" path="../system/flows/saml/saml2/sso-security-flow.xml" />
         <webflow:flow-location id="intercept/security-policy/saml2-ecp" path="../system/flows/saml/saml2/ecp-security-flow.xml" />
         <webflow:flow-location id="intercept/security-policy/saml2-slo" path="../system/flows/saml/saml2/slo-security-flow.xml" />
+        <webflow:flow-location id="intercept/security-policy/saml2-idwsf-ssos" path="../system/flows/saml/saml2/idwsf-ssos-security-flow.xml" />
         <webflow:flow-location id="intercept/security-policy/saml-soap" path="../system/flows/saml/soap-security-flow.xml" />
 
         <!-- CAS protocol flows. -->
+        <webflow:flow-location id="cas.abstract" path="../system/flows/cas/cas-abstract-flow.xml" />
+        <webflow:flow-location id="cas.abstractValidate" path="../system/flows/cas/validate-abstract-flow.xml" />
         <webflow:flow-location id="cas/login" path="../system/flows/cas/login/login-flow.xml" />
         <webflow:flow-location id="cas/proxy" path="../system/flows/cas/proxy/proxy-flow.xml" />
-        <webflow:flow-location id="cas.abstractValidate" path="../system/flows/cas/abstractValidate/abstractValidate-flow.xml" />
         <webflow:flow-location id="cas/serviceValidate" path="../system/flows/cas/serviceValidate/serviceValidate-flow.xml" />
         <webflow:flow-location id="cas/proxyValidate" path="../system/flows/cas/proxyValidate/proxyValidate-flow.xml" />
         <webflow:flow-location id="cas/samlValidate" path="../system/flows/cas/samlValidate/samlValidate-flow.xml" />
+        <webflow:flow-location id="cas/logout" path="../system/flows/logout/logout-flow.xml" />
 
+        <!-- Client storage flows. -->
+        <webflow:flow-location id="client-storage/read" path="../system/flows/client-storage/client-storage-read-flow.xml" />
+        <webflow:flow-location id="client-storage/write" path="../system/flows/client-storage/client-storage-write-flow.xml" />
     </webflow:flow-registry>
 
     <webflow:flow-executor id="flowExecutor">
-        <webflow:flow-execution-repository max-execution-snapshots="0" />
+        <webflow:flow-execution-repository max-execution-snapshots="0" conversation-manager="conversationManager" />
+        <webflow:flow-execution-listeners>
+            <webflow:listener ref="profileRequestContextFlowExecutionListener"
+                              criteria="%{idp.profile.exposeProfileRequestContextInServletRequest:none}" />
+        </webflow:flow-execution-listeners>
     </webflow:flow-executor>
+
+    <bean id="conversationManager" class="org.springframework.webflow.conversation.impl.SessionBindingConversationManager"
+        p:lockTimeoutSeconds="%{idp.webflow.timeout:30}" p:maxConversations="%{idp.webflow.maxConversations:5}" />
 
     <webflow:flow-builder-services id="flowBuilderServices" view-factory-creator="mvcViewFactoryCreator" />
 
@@ -139,5 +160,8 @@
             </list>
         </property>
     </bean>
+
+    <bean id="profileRequestContextFlowExecutionListener"
+          class="net.shibboleth.idp.profile.support.ProfileRequestContextFlowExecutionListener" />
 
 </beans>

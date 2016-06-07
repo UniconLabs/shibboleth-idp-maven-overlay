@@ -11,17 +11,21 @@
 
     <!--
        | The CAS service registry defines verified relying parties by endpoint URI.
-       | Each entry is a regular expression defining a logical group of services whose URIs match the expression.
+       | The default implementation treats the ID of each entry as a regular expression defining a logical group of
+       | services whose URIs match the expression.
+       |
+       | This bean is reloaded periodically according to %{idp.home}/conf/services.properties.
        -->
-    <bean id="cas.serviceRegistry"
-          class="net.shibboleth.idp.cas.service.PatternServiceRegistry">
+    <bean id="reloadableServiceRegistry"
+          class="%{idp.cas.serviceRegistryClass:net.shibboleth.idp.cas.service.PatternServiceRegistry}">
         <property name="definitions">
             <list>
                 <!--
                 <bean class="net.shibboleth.idp.cas.service.ServiceDefinition"
                       c:regex="https://([A-Za-z0-9_-]+\.)*example\.org(:\d+)?/.*"
                       p:group="proxying-services"
-                      p:authorizedToProxy="true" />
+                      p:authorizedToProxy="true"
+                      p:singleLogoutParticipant="true" />
                 <bean class="net.shibboleth.idp.cas.service.ServiceDefinition"
                       c:regex="http://([A-Za-z0-9_-]+\.)*example\.org(:\d+)?/.*"
                       p:group="non-proxying-services"
@@ -30,4 +34,20 @@
             </list>
         </property>
     </bean>
+
+    <!--
+       | Advanced CAS configuration.
+       |
+       | Override default CAS components by creating aliases to custom components where the alias
+       | is the same as the default component bean ID.
+       -->
+    <!--
+    <bean id="cas.CustomTicketService"
+          class="org.example.idp.cas.CustomTicketService" />
+    <alias name="cas.CustomTicketService" alias="cas.TicketService" />
+
+    <bean id="cas.CustomProxyAuthenticator"
+          class="org.example.idp.cas.CustomProxyAuthenticator" />
+    <alias name="cas.CustomProxyAuthenticator" alias="cas.ProxyAuthenticator" />
+    -->
 </beans>

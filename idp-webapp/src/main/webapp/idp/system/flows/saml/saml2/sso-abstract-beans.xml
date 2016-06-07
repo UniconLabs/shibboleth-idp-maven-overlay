@@ -48,23 +48,18 @@
         </property>
     </bean>
     
+    <!-- Default list of context classes or declarations to ignore if an SP requests them. -->
+    <util:list id="shibboleth.DefaultIgnoredContexts">
+        <value>urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified</value>
+    </util:list>
+    
     <bean id="ProcessRequestedAuthnContext"
-        class="net.shibboleth.idp.saml.saml2.profile.impl.ProcessRequestedAuthnContext" scope="prototype" />
+        class="net.shibboleth.idp.saml.saml2.profile.impl.ProcessRequestedAuthnContext" scope="prototype"
+        p:ignoredContexts-ref="#{getObject('shibboleth.IgnoredContexts') != null ? 'shibboleth.IgnoredContexts' : 'shibboleth.DefaultIgnoredContexts'}" />
         
     <bean id="ResolveAttributesPredicate"
         class="net.shibboleth.idp.saml.profile.config.logic.ResolveAttributesProfileConfigPredicate" />
 
-    <bean id="AddAttributeStatementToAssertion"
-            class="net.shibboleth.idp.saml.saml2.profile.impl.AddAttributeStatementToAssertion" scope="prototype">
-        <property name="activationCondition">
-            <bean class="net.shibboleth.idp.saml.profile.config.logic.IncludeAttributeStatementPredicate" />
-        </property>
-        <property name="identifierGeneratorLookupStrategy">
-            <bean class="net.shibboleth.idp.profile.config.navigate.IdentifierGenerationStrategyLookupFunction"
-                p:defaultIdentifierGenerationStrategy-ref="shibboleth.DefaultIdentifierGenerationStrategy" />
-        </property>
-    </bean>
-        
     <bean id="AddNameIDToSubjects"
             class="org.opensaml.saml.saml2.profile.impl.AddNameIDToSubjects" scope="prototype">
         <property name="formatLookupStrategy">
@@ -101,6 +96,15 @@
             <bean class="net.shibboleth.idp.saml.profile.config.navigate.ProxyCountLookupFunction" />
         </property>
     </bean>
+    
+    <bean id="DecorateDelegatedAssertion"
+            class="net.shibboleth.idp.saml.saml2.profile.delegation.impl.DecorateDelegatedAssertion" scope="prototype"
+            p:httpServletRequest-ref="shibboleth.HttpServletRequest"
+            p:libertySSOSEndpointURL="%{idp.delegation.saml2.libertySSOSEndpointURL:#{null}}">
+        <property name="keyInfoGeneratorManager">
+            <bean factory-method="buildBasicKeyInfoGeneratorManager" class="org.opensaml.xmlsec.config.DefaultSecurityConfigurationBootstrap" />
+        </property>
+    </bean>
 
     <bean id="AddChannelBindingsToAssertions"
         class="org.opensaml.saml.saml2.profile.impl.AddChannelBindingsToAssertions" scope="prototype" />
@@ -121,13 +125,20 @@
     <bean id="shibboleth.PreEncodeMessageHandler"
             class="org.opensaml.messaging.handler.impl.BasicMessageHandlerChain" scope="prototype">
         <property name="handlers">
-            <util:list>
-                <!-- TODO outbound handlers -->
+            <list>
                 <bean class="org.opensaml.saml.common.binding.impl.SAMLOutboundDestinationHandler" scope="prototype"/>
                 <bean class="org.opensaml.saml.common.binding.security.impl.EndpointURLSchemeSecurityHandler" scope="prototype"/>
-                <bean class="org.opensaml.saml.common.binding.security.impl.SAMLOutboundProtocolMessageSigningHandler"
-                    scope="prototype" p:signErrorResponses="%{idp.errors.signed:true}" />
-            </util:list>
+                <bean class="org.opensaml.saml.common.binding.security.impl.SAMLOutboundProtocolMessageSigningHandler" scope="prototype"
+                        p:signErrorResponses="%{idp.errors.signed:true}">
+                    <property name="activationCondition">
+                        <bean parent="shibboleth.Conditions.NOT">
+                            <constructor-arg>
+                                <bean class="org.opensaml.saml.common.messaging.logic.SignatureCapableBindingPredicate" />
+                            </constructor-arg>
+                        </bean>
+                    </property>
+                </bean>
+            </list>
         </property>
     </bean>
     
@@ -156,5 +167,44 @@
     <bean id="InitializeOutboundMessageContextForSOAPFault"
         class="net.shibboleth.idp.saml.profile.impl.InitializeOutboundMessageContextForError" scope="prototype"
         p:outboundBinding="urn:oasis:names:tc:SAML:2.0:bindings:PAOS" />
+        
+    <bean id="AddAuthnStatementToAssertionFromInboundAssertionToken"
+        class="net.shibboleth.idp.saml.saml2.profile.delegation.impl.AddAuthnStatementToAssertionFromInboundAssertionToken"
+        scope="prototype"
+        p:httpServletRequest-ref="shibboleth.HttpServletRequest">
+        <property name="identifierGeneratorLookupStrategy">
+            <bean class="net.shibboleth.idp.profile.config.navigate.IdentifierGenerationStrategyLookupFunction"
+                p:defaultIdentifierGenerationStrategy-ref="shibboleth.DefaultIdentifierGenerationStrategy" />
+        </property>
+        <property name="activationCondition">
+            <bean parent="shibboleth.Conditions.Expression">
+                <constructor-arg>
+                    <value>
+                        #profileContext.getProfileId().equals('http://shibboleth.net/ns/profiles/liberty/ssos')
+                    </value>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+    
+    <bean id="AddDelegationRestrictionToAssertions"
+        class="net.shibboleth.idp.saml.saml2.profile.delegation.impl.AddDelegationRestrictionToAssertions"
+        scope="prototype">
+        <property name="activationCondition">
+            <bean parent="shibboleth.Conditions.Expression">
+                <constructor-arg>
+                    <value>
+                        #profileContext.getProfileId().equals('http://shibboleth.net/ns/profiles/liberty/ssos')
+                    </value>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+    
+    <bean id="AddDelegationPolicyToAssertion"
+        class="net.shibboleth.idp.saml.saml2.profile.delegation.impl.AddDelegationPolicyToAssertion"
+        scope="prototype"
+        p:activationCondition-ref="shibboleth.Conditions.IssuingDelegatedAssertion">
+    </bean>
         
 </beans>

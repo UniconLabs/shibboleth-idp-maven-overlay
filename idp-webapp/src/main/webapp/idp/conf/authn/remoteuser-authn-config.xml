@@ -20,17 +20,26 @@
     <util:constant id="shibboleth.authn.RemoteUser.populateUIInfo" static-field="java.lang.Boolean.FALSE" />
 
     <!--
+    Add authentication flow descriptor's supportedPrincipals collection to the resulting Subject?
+    You would normally only unset this if you plan to use the authnMethodHeader servlet parameter to
+    supply authentication method string(s) from the external authentication system.
+    -->
+    <util:constant id="shibboleth.authn.RemoteUser.addDefaultPrincipals" static-field="java.lang.Boolean.TRUE" />
+
+    <!--
     Define entries here to map error messages returned by external modules and classify them as particular
     kinds of errors for use in your templates and as events in flows.
-    
+
+    Keys are events to signal, values are error codes.
+
     The examples here just allow external signaling of an exact condition.
     
     If you want to "fall-through" to other login flows, include a mapping to "ReselectFlow".
     -->
     <util:map id="shibboleth.authn.RemoteUser.ClassifiedMessageMap">
-        <entry key="NoCredentials">
+        <entry key="ReselectFlow">
             <list>
-                <value>ReselectFlow</value>
+                <value>NoCredentials</value>
             </list>
         </entry>
         <entry key="UnknownUsername">

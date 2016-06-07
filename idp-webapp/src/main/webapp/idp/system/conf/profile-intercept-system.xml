@@ -27,6 +27,7 @@
                 <bean id="intercept/security-policy/saml2-sso" parent="shibboleth.InterceptFlow" />
                 <bean id="intercept/security-policy/saml2-ecp" parent="shibboleth.InterceptFlow" />
                 <bean id="intercept/security-policy/saml2-slo" parent="shibboleth.InterceptFlow" />
+                <bean id="intercept/security-policy/saml2-idwsf-ssos" parent="shibboleth.InterceptFlow" />
                 <bean id="intercept/security-policy/saml-soap" parent="shibboleth.InterceptFlow" />
             </list>
         </property>
@@ -34,14 +35,16 @@
 
     <!-- Parent bean for attribute release consent flows. -->
     <bean id="shibboleth.consent.AttributeReleaseFlow" abstract="true"
-            class="net.shibboleth.idp.consent.flow.ar.AttributeReleaseFlowDescriptor"
-            p:storageService-ref="%{idp.consent.StorageService:shibboleth.ClientPersistentStorageService}"
+            class="net.shibboleth.idp.consent.flow.ar.impl.AttributeReleaseFlowDescriptor"
+            p:storageService-ref="#{'%{idp.consent.StorageService:shibboleth.ClientPersistentStorageService}'.trim()}"
             p:doNotRememberConsentAllowed="%{idp.consent.allowDoNotRemember:true}"
             p:globalConsentAllowed="%{idp.consent.allowGlobal:true}"
             p:perAttributeConsentEnabled="%{idp.consent.allowPerAttribute:false}"
             p:compareValues="%{idp.consent.compareValues:false}"
             p:lifetime="%{idp.consent.storageRecordLifetime:P1Y}"
             p:maximumNumberOfStoredRecords="%{idp.consent.maxStoredRecords:10}"
+            p:expandedNumberOfStoredRecords="%{idp.consent.expandedMaxStoredRecords:0}"
+            p:expandedStorageThreshold="%{idp.consent.expandedStorageThreshold:1048576}"
             p:nonBrowserSupported="false">
         <property name="activationCondition">
             <bean parent="shibboleth.Conditions.OR">
@@ -59,11 +62,13 @@
 
     <!-- Parent bean for terms of use consent flows. -->
     <bean id="shibboleth.consent.TermsOfUseFlow" abstract="true"
-        class="net.shibboleth.idp.consent.flow.ConsentFlowDescriptor"
-        p:storageService-ref="%{idp.consent.StorageService:shibboleth.ClientPersistentStorageService}"
+        class="net.shibboleth.idp.consent.flow.impl.ConsentFlowDescriptor"
+        p:storageService-ref="#{'%{idp.consent.StorageService:shibboleth.ClientPersistentStorageService}'.trim()}"
         p:compareValues="%{idp.consent.compareValues:false}"
         p:lifetime="%{idp.consent.storageRecordLifetime:P1Y}"
         p:maximumNumberOfStoredRecords="%{idp.consent.maxStoredRecords:10}"
+        p:expandedNumberOfStoredRecords="%{idp.consent.expandedMaxStoredRecords:0}"
+        p:expandedStorageThreshold="%{idp.consent.expandedStorageThreshold:1048576}"
         p:nonBrowserSupported="false" />
 
     <!-- Function to lookup consent-specific audit context as a child of the consent context. -->
@@ -78,7 +83,7 @@
         <constructor-arg name="f">
             <bean id="shibboleth.ChildLookup.ConsentContext"
                 class="org.opensaml.messaging.context.navigate.ChildContextLookup"
-                c:type="#{ T(net.shibboleth.idp.consent.context.ConsentContext) }" />
+                c:type="#{ T(net.shibboleth.idp.consent.context.impl.ConsentContext) }" />
         </constructor-arg>
     </bean>
 
@@ -118,21 +123,21 @@
             <map>
                 <entry>
                     <key>
-                        <util:constant static-field="net.shibboleth.idp.consent.audit.ConsentAuditFields.CURRENT_CONSENT_IDS" />
+                        <util:constant static-field="net.shibboleth.idp.consent.audit.impl.ConsentAuditFields.CURRENT_CONSENT_IDS" />
                     </key>
-                    <bean class="net.shibboleth.idp.consent.audit.CurrentConsentIdsAuditExtractor" />
+                    <bean class="net.shibboleth.idp.consent.audit.impl.CurrentConsentIdsAuditExtractor" />
                 </entry>
                 <entry>
                     <key>
-                        <util:constant static-field="net.shibboleth.idp.consent.audit.ConsentAuditFields.CURRENT_CONSENT_VALUES" />
+                        <util:constant static-field="net.shibboleth.idp.consent.audit.impl.ConsentAuditFields.CURRENT_CONSENT_VALUES" />
                     </key>
-                    <bean class="net.shibboleth.idp.consent.audit.CurrentConsentValuesAuditExtractor" />
+                    <bean class="net.shibboleth.idp.consent.audit.impl.CurrentConsentValuesAuditExtractor" />
                 </entry>
                 <entry>
                     <key>
-                        <util:constant static-field="net.shibboleth.idp.consent.audit.ConsentAuditFields.CURRENT_CONSENT_IS_APPROVED" />
+                        <util:constant static-field="net.shibboleth.idp.consent.audit.impl.ConsentAuditFields.CURRENT_CONSENT_IS_APPROVED" />
                     </key>
-                    <bean class="net.shibboleth.idp.consent.audit.CurrentConsentIsApprovedAuditExtractor" />
+                    <bean class="net.shibboleth.idp.consent.audit.impl.CurrentConsentIsApprovedAuditExtractor" />
                 </entry>
             </map>
         </property>

@@ -48,6 +48,7 @@
         <evaluate expression="InitializeOutboundMessageContext" />
         <evaluate expression="InitializeMessageChannelSecurityContext" />
         <evaluate expression="PopulateBindingAndEndpointContexts" />
+        <evaluate expression="PopulateDelegationContext" />
         <evaluate expression="PopulateResponseSignatureSigningParameters" />
         <evaluate expression="PopulateAssertionSignatureSigningParameters" />
         <evaluate expression="PopulateEncryptionParameters" />
@@ -81,23 +82,26 @@
         
         <transition on="proceed" to="DoProfileWork" />
     </action-state>
-    
+        
     <!--
-    The meat will be inserted here by defining DoProfileWork and transitioning from
-    there to profile activity and eventually to the final stages below.
+    The meat will be inserted here by defining DoProfileWork and transitioning
+    from there to profile activity and eventually to the final stages below.
     -->
 
     <!-- Post Processing / Encode -->
 
     <!--
-    These actions handle errors by routing to the catch-all end-state, because it's assumed that
-    any error here is unrecoverable and would prevent returning a SAML protocol message regardless.
+    These actions handle errors by routing to the catch-all end-state, because
+    it's assumed that any error here is unrecoverable and would prevent returning
+    a SAML protocol message regardless.
     -->
 
+    <!-- Pick back up with profile. -->
+
     <action-state id="ReturnToParentFlow">
-        <evaluate expression="PopulateOutboundInterceptContext" />        
+        <evaluate expression="PopulateOutboundInterceptContext" />
         <evaluate expression="'proceed'" />
-        
+    
         <transition on="proceed" to="CheckOutboundInterceptContext" />
         <transition to="HandleErrorWithView" />
     </action-state>
@@ -151,6 +155,7 @@
             <evaluate expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)" result="requestScope.encoder" />
             <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="requestScope.request" />
             <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="requestScope.response" />
+            <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.CustomViewContext') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.CustomViewContext') : null" result="requestScope.custom" />
         </on-entry>
         <exception-handler bean="RethrowingFlowExecutionExceptionHandler"/>
     </end-state>
@@ -162,6 +167,7 @@
             <evaluate expression="T(net.shibboleth.utilities.java.support.codec.HTMLEncoder)" result="requestScope.encoder" />
             <evaluate expression="flowRequestContext.getExternalContext().getNativeRequest()" result="requestScope.request" />
             <evaluate expression="flowRequestContext.getExternalContext().getNativeResponse()" result="requestScope.response" />
+            <evaluate expression="flowRequestContext.getActiveFlow().getApplicationContext().containsBean('shibboleth.CustomViewContext') ? flowRequestContext.getActiveFlow().getApplicationContext().getBean('shibboleth.CustomViewContext') : null" result="requestScope.custom" />
         </on-entry>
         <exception-handler bean="RethrowingFlowExecutionExceptionHandler"/>
     </end-state>

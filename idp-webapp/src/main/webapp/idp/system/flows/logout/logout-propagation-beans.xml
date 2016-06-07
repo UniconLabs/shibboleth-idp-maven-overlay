@@ -27,20 +27,19 @@
         p:loggingId="%{idp.service.logging.logout-propagation:LogoutPropagation}"
         p:browserProfile="true" />
 
-    <bean id="PopulateLogoutContextForPropagation"
-        class="net.shibboleth.idp.session.impl.PopulateLogoutContextForPropagation" scope="prototype"
+    <bean id="PopulateLogoutPropagationContext"
+        class="net.shibboleth.idp.session.impl.PopulateLogoutPropagationContext" scope="prototype"
         p:httpServletRequest-ref="shibboleth.HttpServletRequest"
         p:SPSessionSerializerRegistry-ref="shibboleth.SPSessionSerializerRegistry"
         p:dataSealer-ref="shibboleth.DataSealer" />
         
     <bean id="SelectPropagationFlow"
         class="net.shibboleth.idp.session.impl.SelectLogoutPropagationFlow" scope="prototype"
-        p:availableFlows-ref="shibboleth.LogoutPropagationFlows" />
-        
+        c:selector-ref="shibboleth.LogoutPropagationFlowSelector" />
+
     <bean id="WriteAuditLog" class="net.shibboleth.idp.profile.audit.impl.WriteAuditLog" scope="prototype"
         p:formattingMap-ref="shibboleth.AuditFormattingMap" />
 
     <bean id="RecordResponseComplete"
         class="net.shibboleth.idp.profile.impl.RecordResponseComplete" scope="prototype" />
-    
 </beans>
